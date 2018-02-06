@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    
+    <title>Lab 2</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Dee's Juice Bar</h1>
+    <form>
+        <div class="form-group">
+            <label for="customer-name-textbox">Customer Name:</label>
+            <input class="form-control" type="text" name="Customer-Name" id="customer-name-textbox">
+        </div>
+        <div class="form-group">
+            <label for="beverage-type">Beverage:</label>
+            <select class="form-control" name="Beverage" id="beverage-type">
+                <option value="0">Apple Juice</option>
+                <option value="1">Cucumber Smoothie</option>
+                <option value="2">Margarita</option>
+                <option value="3">Mojito</option>
+            </select>
+        </div>
+        <div  class="form-group birthdate invisible">
+            <label for="birthdate">Birthdate</label>
+            <input type="date" name="birthdate" id="birthdate">
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" value= "0" name="size">
+            <label class="form-check-label" for="small-radio" id="small-radio">Small</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" value= "1" name="size">
+            <label class="form-check-label" for="medium-radio" id="medium-radio">Medium</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" value= "2" name="size">
+            <label class="form-check-label" for="large-radio" id="large-radio">Large</label>
+        </div>
+        <div class="form-group">
+            <label for="quantity-textbox">Quantity</label> 
+            <input type="number" name="quantity" id="quantity-textbox"> 
+        </div>
+            <input class="btn btn-warning" id="btn" type="button" value="Checkout">
+    </form> 
+    <div class="alert alert-success text-center invisible" id="checkout" role="alert">
+        <h4 class="alert-heading">Checkout</h4>
+        <p id="order-details"></p>
+        <p id="order-total"></p>
+    </div>
+    <div class="alert alert-danger text-center invisible" id="id-check">
+        You must be over 21 to purchase this product.
+    </div>
+</body>
+</html>
+
+<script>
+    window.onload = function() {
+        document.querySelector('#beverage-type').onchange = itemCheck;
+        document.querySelector('#btn').onclick = submitted;
+    }
+
+    function itemCheck() {
+        var restrictedItems = [2,3];
+        
+        var id = Number(getItem().value);
+        console.log(`Item ID: ${id}`);
+        
+        var i = restrictedItems.indexOf(id);
+        
+        if(i > -1) {
+            console.log(`Item is Restricted: Display birthdate field`);
+            document.querySelector('.birthdate').classList.remove('invisible');
+            document.querySelector('#birthdate').onchange = checkAge;
+        } else {
+            console.log(`Item is Safe`);
+            document.querySelector('.birthdate').classList.add('invisible');
+            document.getElementById('id-check').classList.add('invisible');
+            document.getElementById('btn').disabled = false;
+        }
+    }
+    
+    function checkAge() {
+        age = getAge();
+
+        console.log(`checkAge was called! Age: ${age}`);
+
+        if(age < 21) {
+            document.getElementById('id-check').classList.remove('invisible');
+            document.getElementById('btn').disabled = true;
+        } else {
+            document.getElementById('id-check').classList.add('invisible');
+            document.getElementById('btn').disabled = false;
+        }
+    }
+
+    function getAge() {
+        var birthdate = Number(new Date(document.getElementById('birthdate').value));
+        var today = Number(new Date());
+        var age = (today - birthdate) / (31557600000);
+        return age;
+    }
+   
+    function getCustName() {
+        return document.querySelector('#customer-name-textbox').value;
+    }
+
+    function getSize() {
+        var sizes = ['small', 'medium', 'large'];
+        var size = {};
+        size.value = document.querySelector("input[name = 'size']:checked").value;
+        size.name = sizes[size.value];
+        return size;
+    }
+
+    function getQuantity() {
+        return document.querySelector('#quantity-textbox').value;
+    }
+
+    function getItem() {
+        var itemValue = document.querySelector('select option:checked').value;
+        var itemName = document.querySelector('select option:checked').innerText;
+        return {value: itemValue, name: itemName}
+    }
+
+    function getTotal() {
+        var prices = [[1, 2, 3],[2, 2.5, 3],[4, 5, 6],[8, 9, 10]];
+        var item = getItem().value;
+        var size = getSize().value;
+
+        var quantity = getQuantity();
+        
+        var itemPrice = prices[item][size];
+        var total = itemPrice * quantity;
+
+        return {itemPrice: itemPrice, total: total}
+    }
+
+    function submitted() {
+        if(getQuantity() > 1) {
+            document.getElementById('order-details').innerHTML = `${getCustName()} ordered ${getQuantity()} ${getItem().name}'s @ $${getTotal().itemPrice}`;
+        } else {
+            document.getElementById('order-details').innerHTML = `${getCustName()} ordered ${getQuantity()} ${getItem().name} @ $${getTotal().itemPrice}`;
+        }
+        document.getElementById('order-total').innerHTML = `TOTAL DUE: $${getTotal().total}`;
+        document.getElementById('checkout').classList.remove('invisible');
+    }
+</script>
